@@ -8,7 +8,6 @@ class UsersRouter extends Route {
       try {
         res.send({ message: 'Usuario registrado' });
       } catch (error) {
-        console.log(error)
         if (error.code === 11000) return res.status(400).json({ error: 'El usuario ya existe' })
         res.status(500).json({ error: 'Internal server error' })
       }

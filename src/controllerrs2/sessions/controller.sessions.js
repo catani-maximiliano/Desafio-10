@@ -3,12 +3,17 @@ const Route = require("../../router/Class.Router");
 class SessionRouter extends Route {
   init() {
     this.get('/current', ['PUBLIC'], (req, res) => {
-        if(req.session.user){
-            res.status(200).json({message: 'eres usuario usando sessions como tipo de sesion'});
+      try {
+        if (req.session.user) {
+          res.sendSuccess(req.session.user);
         }
-        else{
-            res.status(200).json({message: 'no eres un usuario logueado'});
+        else {
+          res.sendSuccess({ message: 'no eres un usuario logeado' });
         }
+      } 
+      catch (error) {
+        res.sendServerError(`something went wrong ${error}`)
+      }
     })
   }
 }

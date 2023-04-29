@@ -39,15 +39,14 @@ class MongoCartManager {
         try {
             const cart = await Cart.findById(idCart);
             if(exist){
-                const productsArrayPosition = cart.products.findIndex(item => item.product == idProduct);
+                const productsArrayPosition = cart.products.findIndex(item => item.product.id == idProduct);
                 cart.products[productsArrayPosition].quantity= cart.products[productsArrayPosition].quantity + 1;
             }
             else{
                 cart.products.push({product: idProduct, quantity: 1});
             }
             const response = Cart.findByIdAndUpdate(idCart , cart)
-            //return "cart products updated";
-            return response
+            return response;
         }
         catch (error) {
             return error;
@@ -78,14 +77,14 @@ class MongoCartManager {
         try {
             const cart = await Cart.findById(idCart);
             if(exist){
-                const productsArrayPosition = cart.products.findIndex(item => item.product == idProduct);
-                cart.products[productsArrayPosition].quantity= quantity;
+                const productsArrayPosition = cart.products.findIndex(item => item.product.id == idProduct);
+                cart.products[productsArrayPosition].quantity = quantity;
             }
             else{
                 cart.products.push({product: idProduct, quantity: quantity});
             }
             const response = Cart.findByIdAndUpdate(idCart , cart)
-            return response
+            return response;
         }
         catch (error) {
             return error;
@@ -98,8 +97,7 @@ class MongoCartManager {
             cart.products=products
 
             const response = Cart.findByIdAndUpdate(idCart , cart)
-            //return "cart products updated";
-            return response
+            return response;
         }
         catch (error) {
             return error;

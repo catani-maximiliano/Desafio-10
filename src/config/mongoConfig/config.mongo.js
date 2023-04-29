@@ -2,10 +2,12 @@ const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo')
 const session = require("express-session");
 
+const { dbConnet, dbSessionName } = require("./db.config");
+
 const mongoConfig = (app) => {
     app.use(session({
         store: MongoStore.create({
-            mongoUrl:"mongodb+srv://admin:admin@cluster0.baldr.mongodb.net/sessions?retryWrites=true&w=majority",
+            mongoUrl:dbSessionName,
             mongoOptions:{useNewUrlParser: true},
         }),
         secret: "C0ntr4",
@@ -15,7 +17,7 @@ const mongoConfig = (app) => {
 
 
     mongoose.set('strictQuery', false)
-    mongoose.connect('mongodb+srv://admin:admin@cluster0.baldr.mongodb.net/sessions?retryWrites=true&w=majority', error => {
+    mongoose.connect(dbConnet, error => {
     if (error) {
         console.log(`Cannot connect to db. error ${error}`);
     }

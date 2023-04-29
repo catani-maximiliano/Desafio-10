@@ -12,10 +12,11 @@ const privateAcces = (req, res, next) => {
 
 class ProductsRouter extends Route {
     init() {
-        this.get('/', ['PUBLIC'], privateAcces, async (req, res) => {
+        //this.get('/', ['PUBLIC'], privateAcces, async (req, res) => {
+        this.get('/', ['PUBLIC'], async (req, res) => {
             try {
                 const { user } = req.session;
-                let linkMold = req.protocol + '://' + req.get('host') + '/api/products/';
+                let linkMold = req.protocol + '://' + req.get('host') + '/products/';
                 let limit;
                 let page;
                 let sort;
@@ -81,14 +82,14 @@ class ProductsRouter extends Route {
                     prevLink = null;
                 }
                 else {
-                    prevLink = req.protocol + '://' + req.get('host') + '/api/products' + '?' + `page=${products.prevPage}` + `&limit=${limit}&sort=${prevSort}`;
+                    prevLink = req.protocol + '://' + req.get('host') + '/products' + '?' + `page=${products.prevPage}` + `&limit=${limit}&sort=${prevSort}`;
                 }
 
                 if (products.hasNextPage == false) {
                     nextLink = null;
                 }
                 else {
-                    nextLink = req.protocol + '://' + req.get('host') + '/api/products' + '?' + `page=${products.nextPage}` + `&limit=${limit}&sort=${prevSort}`;
+                    nextLink = req.protocol + '://' + req.get('host') + '/products' + '?' + `page=${products.nextPage}` + `&limit=${limit}&sort=${prevSort}`;
                 }
 
                 const respuestaInfo = {
@@ -102,26 +103,33 @@ class ProductsRouter extends Route {
                     hasNextPage: products.hasNextPage,
                     prevLink: prevLink,
                     nextLink: nextLink,
-                    linkMold: linkMold
+                    linkMold: linkMold,
+                    user: user
                 };
-                res.status(500).render('products', { respuestaInfo: respuestaInfo, user });
-            } catch (error) {
-                res.status(500).json({ mesagge: { error } });
+                //res.status(500).render('products', { respuestaInfo: respuestaInfo, user });//mandar a views!!!!!!!!!!!
+                res.sendSuccess(respuestaInfo);
+            }
+            catch (error) {
+                res.sendServerError(`something went wrong ${error}`)
             }
         })
 
-        this.get('/:id', ['PUBLIC'], privateAcces, async (req, res) => {
-            const productId = req.params.id;
-            const getById = await productsMongo.getProductById(productId);
-            //console.log(getById)
-            res.status(500).render('productID', getById);
-            //res.status(200).json({ mesagge: getById });
+        //this.get('/:id', ['PUBLIC'], privateAcces, async (req, res) => {
+        this.get('/:id', ['PUBLIC'], async (req, res) => {
+            try {
+                const productId = req.params.id;
+                const getById = await productsMongo.getProductById(productId);
+                //res.status(500).render('productID', getById);//mandar a views!!!!!!!!!!!
+                res.sendSuccess(getById);
+            }
+            catch (error) {
+                res.sendServerError(`something went wrong ${error}`)
+            }
         })
 
         this.post('/', ['ADMIN'], async (req, res) => {
             try {
                 const { title, description, price, thumbnail, code, stock, status, category } = req.body;
-
                 const newProduct = {
                     title,
                     description,
@@ -132,59 +140,66 @@ class ProductsRouter extends Route {
                     status,
                     category
                 }
-
                 const verifyExistenceUndefined = Object.values(newProduct).indexOf(undefined);
-
                 if (verifyExistenceUndefined === -1) {
                     const createdProduct = await productsMongo.addProduct(newProduct);
                     const products = await productsMongo.getProducts();
                     global.io.emit('statusProductsList', products);
-                    res.json({ mesagge: createdProduct });
+                    res.sendSuccess(createdProduct);
                 }
                 else {
-                    res.status(406).json({ mesagge: "Product with missing information" });
+                    res.sendUserError({ mesagge: "Product with missing information" });
                 }
-            } catch (error) {
-                res.status(500).json({ mesagge: { error } });
+            }
+            catch (error) {
+                res.sendServerError(`something went wrong ${error}`)
             }
         })
 
         this.put('/:id', ['ADMIN'], async (req, res) => {
-            const productId = req.params.id;
-            const { title, description, price, thumbnail, code, stock, status, category } = req.body;
+            try {
+                const productId = req.params.id;
+                const { title, description, price, thumbnail, code, stock, status, category } = req.body;
+                const newUpdatedProduct = {
+                    title,
+                    description,
+                    price,
+                    thumbnail,
+                    code,
+                    stock,
+                    status,
+                    category
+                }
+                const verifyExistenceUndefined = Object.values(newUpdatedProduct).indexOf(undefined);
 
-            const newUpdatedProduct = {
-                title,
-                description,
-                price,
-                thumbnail,
-                code,
-                stock,
-                status,
-                category
+                if (verifyExistenceUndefined === -1) {
+                    const UpdatedProduct = await productsMongo.updateProduct(productId, newUpdatedProduct);
+                    const products = await productsMongo.getProducts();
+                    global.io.emit('statusProductsList', products);
+                    res.sendSuccess(UpdatedProduct);
+                }
+                else {
+                    res.sendUserError({ mesagge: "Product with missing information" });
+                }
             }
-
-            const verifyExistenceUndefined = Object.values(newUpdatedProduct).indexOf(undefined);
-
-            if (verifyExistenceUndefined === -1) {
-                const UpdatedProduct = await productsMongo.updateProduct(productId, newUpdatedProduct);
-                const products = await productsMongo.getProducts();
-                global.io.emit('statusProductsList', products);
-                res.json({ mesagge: UpdatedProduct });
-            }
-            else {
-                res.status(406).json({ mesagge: "Product with missing information" });
+            catch (error) {
+                res.sendServerError(`something went wrong ${error}`)
             }
         })
 
         this.delete('/:id', ['ADMIN'], async (req, res) => {
-            const productId = req.params.id;
-            const getById = await productsMongo.deleteById(productId);
-            const products = await productsMongo.getProducts();
-            global.io.emit('statusProductsList', products);
-            res.status(200).json({ mesagge: getById });
+            try {
+                const productId = req.params.id;
+                const getById = await productsMongo.deleteById(productId);
+                const products = await productsMongo.getProducts();
+                global.io.emit('statusProductsList', products);
+                res.sendSuccess(getById);
+            }
+            catch (error) {
+                res.sendServerError(`something went wrong ${error}`)
+            }
         })
-     }
+    }
 }
 
 module.exports = ProductsRouter;

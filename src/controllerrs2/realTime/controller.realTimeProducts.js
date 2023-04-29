@@ -6,11 +6,16 @@ const Route = require("../../router/Class.Router");
 class RealTimeRouter extends Route {
   init() {
     this.get('/', ['PUBLIC'], async (req, res) => {
+      try {
         const products = await productsMongo.getProducts();
         const getAll = products;
     
         global.io.emit('productsList', products);
-        res.render('realTimeProducts.handlebars',  {getAll} );
+        res.sendSuccess(getAll);  
+      } 
+      catch (error) {
+        res.sendServerError(`something went wrong ${error}`)
+      }
     })
   }
 }

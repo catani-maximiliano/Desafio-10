@@ -19,7 +19,7 @@ class UserManager{
             const response = await userModel.findOne({email: user})
             return response;
         } catch (error) {
-            console.log(error)
+            throw new Error(error)
         }
     }
 
@@ -28,7 +28,7 @@ class UserManager{
             const response = await userModel.findById(id)
             return response;
         } catch (error) {
-            console.log(error)
+            throw new Error(error)
         }
     }
 

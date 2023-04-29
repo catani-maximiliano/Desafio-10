@@ -1,12 +1,12 @@
 <h1>Lista de productos</h1>
 
  {{#each data}}
-    <div class="user-info">
+    <div class="user-info" style="border: 2px solid; margin:1rem; padding:1rem; ">
       <span id="userInfo">
       <h2>{{this.title}}</h2>
       <p>description: {{this.description}}</p>
       <p>price: {{this.price}}</p>
-      <p>thumbnail: {{this.thumbnail}}</p>
+      <p>thumbnail: </p><img src="{{this.thumbnail}}" style="max-width: 100px; heigth: 100px;"></img>
       <p>code: {{this.code}}</p>
       <p>stock: {{this.stock}}</p>
       <p>status: {{this.status}}</p>
